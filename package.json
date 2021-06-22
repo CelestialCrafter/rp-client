@@ -1,0 +1,19 @@
+{
+	"name": "rpclient",
+	"version": "1.0.0",
+	"description": "A Discord RPC Client for making your status better",
+	"main": "app.js",
+	"author": "CelestialCrafter <celestialcraftermc@gmail.com> (https://github.com/CelestialCrafter)",
+	"license": "MIT",
+	"dependencies": {
+		"@paulcbetts/system-idle-time": "^1.0.5",
+		"discord-rpc": "^3.2.0",
+		"express": "^4.17.1",
+		"open": "^8.2.0",
+		"ps-list": "^7.2.0",
+		"spotify-web-api-node": "^5.0.2"
+	},
+	"scripts": {
+		"start": "node ."
+	}
+}
