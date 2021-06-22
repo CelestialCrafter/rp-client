@@ -76,5 +76,5 @@ client.on('ready', () => {
 	console.log(`Running\nUser ID: ${client.user.id}`);
 });
 
-client.login({ clientId: '823637382967328779' });
+client.login({ clientId: options.clientId });
 module.exports = app;

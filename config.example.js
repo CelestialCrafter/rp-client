@@ -1,4 +1,5 @@
 const config = {
+	clientId: '823637382967328779',
 	image: 'celestial_profile',
 	statuses: [
 		'status1',
