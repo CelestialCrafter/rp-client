@@ -6,7 +6,7 @@ const system = require('@paulcbetts/system-idle-time');
 
 const client = new RPC.Client({ transport: 'ipc' });
 
-options.processes.forEach(fp => fp.initialization ? fp.initialization() : null);
+options.processes.forEach(fp => (fp.init && fp.useState ? fp.init() : null));
 
 const refreshStatus = async () => {
 	// 5 Minutes counts as AFK
@@ -22,20 +22,20 @@ const refreshStatus = async () => {
 	const highestPriority = Math.max(
 		...formattedProcesses.map(fp => fp.priority)
 	);
-	const process = formattedProcesses.find(
-		(fp) => fp.priority == highestPriority
-	);
+	const process = formattedProcesses.find(fp => fp.priority == highestPriority);
 
 	const statusIndex = Math.floor(Math.random() * options.statuses.length);
 	let state = null;
 	if (!process) state = { success: false, error: new Error('No Process') };
-	else if (!process.state) state = { success: false, error: new Error('No State') };
-	else if (!process.useState) state = { success: false, error: new Error('State not in use') };
+	else if (!process.state)
+		state = { success: false, error: new Error('No State') };
+	else if (!process.useState)
+		state = { success: false, error: new Error('State not in use') };
 	else state = await process.state();
 
 	const buttons = [options.button];
 	// If state exists, check if a button exists on the state and push it to the buttons list
-	state.success ? state.button ? buttons.push(state.button) : null : null;
+	state.success ? (state.button ? buttons.push(state.button) : null) : null;
 
 	process
 		? console.log(`
@@ -46,7 +46,9 @@ Priority: ${process.priority}
 Image Key: ${process.image}
 Status: ${options.statuses[statusIndex]}
 State: ${JSON.stringify(state)}
-Using Status?: ${state.success}${state.success ? '' : `\n${state.error.toString()}`}
+Using Status?: ${state.success}${
+	state.success ? '' : `\n${state.error.toString()}`
+		  }
 -------------------------`)
 		: null;
 
@@ -59,13 +61,13 @@ Using Status?: ${state.success}${state.success ? '' : `\n${state.error.toString(
 			smallImageKey: process.image,
 			smallImageText: `${process.name} - Priority: ${process.priority}`,
 			buttons
-		})
+		  })
 		: client.setActivity({
 			details: options.statuses[statusIndex],
 			largeImageKey: options.image,
 			largeImageText: `${client.user.username}#${client.user.discriminator}`,
 			buttons: options.buttons
-		});
+		  });
 };
 
 client.on('ready', () => {

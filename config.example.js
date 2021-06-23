@@ -1,10 +1,7 @@
 const config = {
 	clientId: '823637382967328779',
 	image: 'celestial_profile',
-	statuses: [
-		'status1',
-		'status2'
-	],
+	statuses: ['status1', 'status2'],
 	button: {
 		label: 'cool link',
 		url: 'http://google.com'
