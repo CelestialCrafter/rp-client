@@ -1,7 +1,6 @@
 const RPC = require('discord-rpc');
 const psList = require('ps-list');
 const options = require('./config');
-const app = require('express')();
 const system = require('@paulcbetts/system-idle-time');
 
 const client = new RPC.Client({ transport: 'ipc' });
@@ -71,7 +70,6 @@ Using Status?: ${state.success}${
 };
 
 client.on('ready', () => {
-	app.listen(50823);
 	client.clearActivity();
 	refreshStatus();
 	setInterval(refreshStatus, 15 * 1000);
@@ -79,4 +77,3 @@ client.on('ready', () => {
 });
 
 client.login({ clientId: options.clientId });
-module.exports = app;

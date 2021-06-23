@@ -78,6 +78,7 @@ const authorizeSpotify = () => {
 		spotifyApi
 			.refreshAccessToken()
 			.then(data => {
+				console.log('setitng token');
 				spotifyApi.setAccessToken(data.body['access_token']);
 				console.log('Spotify has been authorized');
 			})
@@ -95,4 +96,4 @@ const authorizeSpotify = () => {
 };
 
 module.exports = spotify;
-module.exports.authorizeSpotify = authorizeSpotify;
+module.exports.init = authorizeSpotify;
