@@ -48,6 +48,7 @@ const getUserCredentials = () => {
 
 	app.get('/', (req, res) => {
 		res.sendFile(join(__dirname, 'auth.html'));
+		if (!req.query.code) return console.error(new Error('No Auth Code'));
 		spotifyApi
 			.authorizationCodeGrant(req.query.code)
 			.then(data => {
@@ -61,7 +62,7 @@ const getUserCredentials = () => {
 				listener.close();
 				console.log('Spotify has been authorized');
 			})
-			.catch(err => console.log('Error: ' + err.body.error.message));
+			.catch(err => console.error(new Error(err.body.error.message)));
 	});
 
 	const authUrl = spotifyApi.createAuthorizeURL(
