@@ -47,13 +47,13 @@ const getUserCredentials = () => {
 	);
 
 	app.get('/', (req, res) => {
-		res.sendFile(join(__dirname, 'auth.html'));
+		res.sendFile(join(__dirname, '../auth.html'));
 		if (!req.query.code) return console.error(new Error('No Auth Code'));
 		spotifyApi
 			.authorizationCodeGrant(req.query.code)
 			.then(data => {
-				spotifyApi.setAccessToken(data.body['access_token']);
-				spotifyApi.setRefreshToken(data.body['refresh_token']);
+				spotifyApi.setAccessToken(data.body.access_token);
+				spotifyApi.setRefreshToken(data.body.refresh_token);
 				try {
 					writeFileSync(credentialPath, data.body['refresh_token']);
 				} catch (err) {
@@ -67,7 +67,7 @@ const getUserCredentials = () => {
 
 	const authUrl = spotifyApi.createAuthorizeURL(
 		['user-read-playback-state', 'user-read-currently-playing'],
-		crypto.randomBytes(15).toString('hex')
+		crypto.randomBytes(16).toString('hex')
 	);
 	open(authUrl);
 };
@@ -78,7 +78,6 @@ const authorizeSpotify = () => {
 		spotifyApi
 			.refreshAccessToken()
 			.then(data => {
-				console.log('setitng token');
 				spotifyApi.setAccessToken(data.body['access_token']);
 				console.log('Spotify has been authorized');
 			})

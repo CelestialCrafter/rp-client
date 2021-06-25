@@ -5,7 +5,7 @@ const system = require('@paulcbetts/system-idle-time');
 
 const client = new RPC.Client({ transport: 'ipc' });
 
-options.processes.forEach(fp => (fp.init && fp.useState ? fp.init() : null));
+options.processes.forEach(fp => (fp.useState ? fp?.init() : null));
 
 const refreshStatus = async () => {
 	// 5 Minutes counts as AFK
@@ -45,27 +45,33 @@ Priority: ${process.priority}
 Image Key: ${process.image}
 Status: ${options.statuses[statusIndex]}
 State: ${JSON.stringify(state)}
-Using Status?: ${state.success}${
-	state.success ? '' : `\n${state.error.toString()}`
+Using State: ${state.success}${
+	!state.success ? `\n${state.error.toString()}` : ''
 		  }
 -------------------------`)
 		: null;
 
 	process
 		? client.setActivity({
-			details: isAfk ? 'Idle' : 'Using ' + process.display,
-			state: state.success ? state.result : options.statuses[statusIndex],
+			details: isAfk
+				? 'Idle'
+				: process.display
+					? 'Using ' + process.display
+					: null,
+			state: state?.result || options.statuses[statusIndex],
 			largeImageKey: options.image,
 			largeImageText: `${client.user.username}#${client.user.discriminator}`,
-			smallImageKey: process.image,
-			smallImageText: `${process.name} - Priority: ${process.priority}`,
+			smallImageKey: process?.image,
+			smallImageText: `${process.name} - Priority: ${process.priority}${
+				state.smallData ? ' - ' + state.smallData : null
+			}`,
 			buttons
 		  })
 		: client.setActivity({
 			details: options.statuses[statusIndex],
 			largeImageKey: options.image,
 			largeImageText: `${client.user.username}#${client.user.discriminator}`,
-			buttons: options.buttons
+			buttons
 		  });
 };
 
