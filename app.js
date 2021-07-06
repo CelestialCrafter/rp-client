@@ -5,7 +5,7 @@ const system = require('@paulcbetts/system-idle-time');
 
 const client = new RPC.Client({ transport: 'ipc' });
 
-options.processes.forEach(fp => (fp.useState ? fp?.init() : null));
+options.processes.forEach(fp => (fp.useState ? fp.init?.() : null));
 
 const refreshStatus = async () => {
 	// 5 Minutes counts as AFK
@@ -55,16 +55,12 @@ Using State: ${state.success}${
 		? client.setActivity({
 			details: isAfk
 				? 'Idle'
-				: process.display
-					? 'Using ' + process.display
-					: null,
+				: 'Using ' + process.display,
 			state: state?.result || options.statuses[statusIndex],
 			largeImageKey: options.image,
 			largeImageText: `${client.user.username}#${client.user.discriminator}`,
 			smallImageKey: process?.image,
-			smallImageText: `${process.name} - Priority: ${process.priority}${
-				state.smallData ? ' - ' + state.smallData : null
-			}`,
+			smallImageText: `${process.name} - Priority: ${process.priority}${state.smallData ? ' - ' + state.smallData : ''}`,
 			buttons
 		  })
 		: client.setActivity({
@@ -78,7 +74,7 @@ Using State: ${state.success}${
 client.on('ready', () => {
 	client.clearActivity();
 	refreshStatus();
-	setInterval(refreshStatus, 15 * 1000);
+	setInterval(refreshStatus, options.refreshDelay);
 	console.log(`Running\nUser ID: ${client.user.id}`);
 });
 

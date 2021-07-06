@@ -1,6 +1,7 @@
 const config = {
 	clientId: '823637382967328779',
-	image: 'celestial_profile',
+	image: 'cool_image_key',
+	refreshDelay: 10 * 1000,
 	statuses: ['status1', 'status2'],
 	button: {
 		label: 'cool link',
@@ -8,9 +9,9 @@ const config = {
 	},
 	processes: [
 		{
-			display: 'Discord',
-			name: 'DiscordCanary.exe',
-			image: 'discord',
+			display: 'App Name!',
+			name: 'Process.exe',
+			image: 'appname_image_key',
 			priority: 0
 		},
 		{
