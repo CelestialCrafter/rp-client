@@ -13,7 +13,6 @@ Yarn:
 ```sh
 cd rp-client
 yarn
-yarn start
 ```
 
 NPM:
@@ -21,8 +20,11 @@ NPM:
 ```sh
 cd rp-client
 npm i
-npm start
 ```
+
+Make a file named `config.js` in the main folder, and make `config.js` in every state folder (Optional)
+
+Run the start script
 
 ## License
 
