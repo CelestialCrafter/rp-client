@@ -8,8 +8,8 @@ const client = new RPC.Client({ transport: 'ipc' });
 options.processes.forEach(fp => (fp.useState ? fp.init?.() : null));
 
 const refreshStatus = async () => {
-	// 5 Minutes counts as AFK
-	const isAfk = system.getIdleTime() >= 5 * 60 * 1000 ? true : false;
+	// afkTime counts as AFK
+	const isAfk = system.getIdleTime() >= options.afkTime ? true : false;
 
 	const processList = await psList();
 	const selectedProcesses = processList
@@ -32,7 +32,7 @@ const refreshStatus = async () => {
 		state = { success: false, error: new Error('State not in use') };
 	else state = await process.state();
 
-	const buttons = [options.button];
+	const buttons = [ options.button ];
 	// If state exists, check if a button exists on the state and push it to the buttons list
 	state.success ? (state.button ? buttons.push(state.button) : null) : null;
 

@@ -1,6 +1,7 @@
 const config = {
 	clientId: '823637382967328779',
 	image: 'cool_image_key',
+	afkTime: 5 * 60 * 1000,
 	refreshDelay: 10 * 1000,
 	statuses: ['status1', 'status2'],
 	button: {
