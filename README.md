@@ -11,7 +11,7 @@ Install [git](https://git-scm.com/) and run the following commands for your pack
 NPM:
 
 ```sh
-git clone https://CelestialCrafter/rp-client
+git clone https://github.com/CelestialCrafter/rp-client
 cd rp-client
 npm i
 ```
@@ -19,7 +19,7 @@ npm i
 Yarn:
 
 ```sh
-git clone https://CelestialCrafter/rp-client
+git clone https://github.com/CelestialCrafter/rp-client
 cd rp-client
 yarn
 ```
