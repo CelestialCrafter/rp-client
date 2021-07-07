@@ -14,7 +14,6 @@ NPM:
 git clone https://CelestialCrafter/rp-client
 cd rp-client
 npm i
-npm start
 ```
 
 Yarn:
@@ -23,12 +22,23 @@ Yarn:
 git clone https://CelestialCrafter/rp-client
 cd rp-client
 yarn
-yarn start
 ```
 
 Make a file named `config.js` in the main folder, and make `config.js` in every state folder (Optional)
 
-Run the start script
+Run the app
+
+Yarn:
+
+```sh
+yarn start
+```
+
+NPM:
+
+```sh
+npm start
+```
 
 ## License
 
