@@ -1,15 +1,22 @@
 const RPC = require('discord-rpc');
 const psList = require('ps-list');
 const options = require('./config');
-const system = require('@paulcbetts/system-idle-time');
+
+let getAfk = () => 0;
+
+try {
+	const system = require('@paulcbetts/system-idle-time');
+	getAfk = () => system.getIdleTime() >= options.afkTime ? true : false;
+} catch(e) {
+	console.log('AFK Feature Disabled');
+}
 
 const client = new RPC.Client({ transport: 'ipc' });
 
 options.processes.forEach(fp => (fp.useState ? fp.init?.() : null));
 
 const refreshStatus = async () => {
-	// afkTime counts as AFK
-	const isAfk = system.getIdleTime() >= options.afkTime ? true : false;
+	const isAfk = getAfk();
 
 	const processList = await psList();
 	const selectedProcesses = processList
