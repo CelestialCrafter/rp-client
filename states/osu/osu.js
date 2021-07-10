@@ -2,6 +2,11 @@
 const options = require('./config.js');
 const axios = require('axios');
 const OAuth = require('oauth');
+const debug = require('debug');
+
+const logOsu = debug('feature:osu');
+
+debug.log = console.info.bind(console);
 
 let accessToken = '';
 
@@ -19,7 +24,7 @@ const osu = () =>
 					button: { label: 'Spectate', url: `osu://spectate/${options.userId}` }
 				})
 			)
-			.catch(err => res({ success: false, error: new Error(err.toString()) }));
+			.catch(error => res({ success: false, error }));
 	});
 
 const authorizeOsu = () => {
@@ -37,7 +42,7 @@ const authorizeOsu = () => {
 		{ grant_type: 'client_credentials', scope: 'public' },
 		(err, accessTokenResp) => {
 			accessToken = accessTokenResp;
-			console.log('osu! has been authorized');
+			logOsu('osu! has been authorized');
 		}
 	);
 };

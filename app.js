@@ -1,14 +1,25 @@
 const RPC = require('discord-rpc');
 const psList = require('ps-list');
 const options = require('./config');
+const debug = require('debug');
+
+const logAFK = debug('feature:afk');
+const logAFKError = logAFK.extend('error');
+const logMain = debug('main');
+const logRPC = debug('rpc');
+
+debug.log = console.info.bind(console);
+logAFKError.log = console.error.bind(console);
 
 let getAfk = () => 0;
 
 try {
 	const system = require('@paulcbetts/system-idle-time');
-	getAfk = () => system.getIdleTime() >= options.afkTime ? true : false;
-} catch(e) {
-	console.log('AFK Feature Disabled');
+	getAfk = () => (system.getIdleTime() >= options.afkTime ? true : false);
+	logAFK('AFK Enabled');
+} catch (e) {
+	logAFK('AFK Disabled');
+	logAFKError(e);
 }
 
 const client = new RPC.Client({ transport: 'ipc' });
@@ -39,35 +50,34 @@ const refreshStatus = async () => {
 		state = { success: false, error: new Error('State not in use') };
 	else state = await process.state();
 
-	const buttons = [ options.button ];
+	const buttons = [options.button];
 	// If state exists, check if a button exists on the state and push it to the buttons list
 	state.success ? (state.button ? buttons.push(state.button) : null) : null;
 
 	process
-		? console.log(`
--------------------------
-Executable: ${process.name}
-Display Name: ${process.display}
-Priority: ${process.priority}
-Image Key: ${process.image}
-Status: ${options.statuses[statusIndex]}
-State: ${JSON.stringify(state)}
-Using State: ${state.success}${
-	!state.success ? `\n${state.error.toString()}` : ''
-		  }
--------------------------`)
-		: null;
+		? logRPC('RPC Update %O', {
+			executable: process.name,
+			displayName: process.display,
+			priority: process.priority,
+			imageKey: process.image,
+			status: options.statuses[statusIndex],
+			state: { ...state, error: state.error.toString() },
+			usingState: state.success
+		})
+		: logRPC('RPC Update %O', {
+			status: options.statuses[statusIndex]
+		});
 
 	process
 		? client.setActivity({
-			details: isAfk
-				? 'Idle'
-				: 'Using ' + process.display,
+			details: isAfk ? 'Idle' : 'Using ' + process.display,
 			state: state?.result || options.statuses[statusIndex],
 			largeImageKey: options.image,
 			largeImageText: `${client.user.username}#${client.user.discriminator}`,
 			smallImageKey: process?.image,
-			smallImageText: `${process.name} - Priority: ${process.priority}${state.smallData ? ' - ' + state.smallData : ''}`,
+			smallImageText: `${process.name} - Priority: ${process.priority}${
+				state.smallData ? ' - ' + state.smallData : ''
+			}`,
 			buttons
 		  })
 		: client.setActivity({
@@ -82,7 +92,9 @@ client.on('ready', () => {
 	client.clearActivity();
 	refreshStatus();
 	setInterval(refreshStatus, options.refreshDelay);
-	console.log(`Running\nUser ID: ${client.user.id}`);
+
+	logMain('Logged In');
+	logMain(`User ID: ${client.user.id}`);
 });
 
 client.login({ clientId: options.clientId });

@@ -5,6 +5,16 @@ const crypto = require('crypto');
 const { writeFileSync, readFileSync, existsSync, mkdirSync } = require('fs');
 const { join } = require('path');
 const options = require('./config.js');
+const debug = require('debug');
+
+const logHttp = debug('http');
+const logSpotify = debug('feature:spotify');
+const logSpotifyWarning = logSpotify.extend('warning');
+const logSpotifyError = logSpotify.extend('error');
+
+debug.log = console.info.bind(console);
+logSpotifyWarning.log = console.warn.bind(console);
+logSpotifyError.log = console.error.bind(console);
 
 const spotifyApi = new SpotifyWebApi({
 	redirectUri: 'http://localhost:52752/',
@@ -43,7 +53,7 @@ const spotify = () =>
 
 const getUserCredentials = () => {
 	const listener = app.listen(52752, () =>
-		console.log('Listening for spotify auth on port 52752')
+		logHttp('Listening for spotify auth on port 52752')
 	);
 
 	app.get('/', (req, res) => {
@@ -60,7 +70,7 @@ const getUserCredentials = () => {
 					console.error(err);
 				}
 				listener.close();
-				console.log('Spotify has been authorized');
+				logSpotify('Spotify has been authorized');
 			})
 			.catch(err => console.error(new Error(err.body.error.message)));
 	});
@@ -79,17 +89,17 @@ const authorizeSpotify = () => {
 			.refreshAccessToken()
 			.then(data => {
 				spotifyApi.setAccessToken(data.body['access_token']);
-				console.log('Spotify has been authorized');
+				logSpotify('Spotify has been authorized');
 			})
 			.catch(err => {
-				console.log(err);
-				console.log('Requesting user authentication');
+				logSpotifyError(err);
+				logSpotifyError('Requesting user authentication');
 				getUserCredentials();
 			});
 	} else {
 		if (!existsSync(dataPath)) mkdirSync(dataPath);
-		console.log('Refresh token file does not exist');
-		console.log('Requesting user authentication');
+		logSpotifyWarning('Refresh token file does not exist');
+		logSpotifyWarning('Requesting user authentication');
 		getUserCredentials();
 	}
 };
