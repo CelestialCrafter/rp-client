@@ -3,6 +3,8 @@ const psList = require('ps-list');
 const options = require('./config');
 const debug = require('debug');
 
+require('dotenv').config();
+
 const logAFK = debug('feature:afk');
 const logAFKError = logAFK.extend('error');
 const logMain = debug('main');
@@ -10,6 +12,8 @@ const logRPC = debug('rpc');
 
 debug.log = console.info.bind(console);
 logAFKError.log = console.error.bind(console);
+
+logMain(`Running in ${global.process.env.NODE_ENV} environment`);
 
 let getAfk = () => 0;
 
@@ -61,12 +65,12 @@ const refreshStatus = async () => {
 			priority: process.priority,
 			imageKey: process.image,
 			status: options.statuses[statusIndex],
-			state: { ...state, error: state.error.toString() },
+			state: { ...state, error: state.error?.toString() },
 			usingState: state.success
-		})
+		  })
 		: logRPC('RPC Update %O', {
 			status: options.statuses[statusIndex]
-		});
+		  });
 
 	process
 		? client.setActivity({
@@ -91,7 +95,9 @@ const refreshStatus = async () => {
 client.on('ready', () => {
 	client.clearActivity();
 	refreshStatus();
-	setInterval(refreshStatus, options.refreshDelay);
+	setInterval(() => {
+		refreshStatus();
+	}, options.refreshDelay);
 
 	logMain('Logged In');
 	logMain(`User ID: ${client.user.id}`);
