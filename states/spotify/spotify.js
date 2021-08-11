@@ -32,20 +32,20 @@ const spotify = () =>
 			.then(data => {
 				if (!data.body.device) return;
 				if (
-					!options.allowedDevices.includes(data.body.device.id)
-					&& !options.allowedDevices.includes(data.body.device.name)
+					!options.allowedDevices.includes(data.body.device.id) &&
+					!options.allowedDevices.includes(data.body.device.name)
 				)
 					return;
 				data.body.device.is_private_session
 					? res({ success: false, error: new Error('Private Session') })
 					: res({
-						success: true,
-						result: `${data.body.item.artists[0].name} - ${data.body.item.name}`,
-						smallData: `Volume: ${data.body.device.volume_percent}`,
-						button: {
-							label: 'Listen',
-							url: data.body.item.external_urls.spotify
-						}
+							success: true,
+							result: `${data.body.item.artists[0].name} - ${data.body.item.name}`,
+							smallData: `Volume: ${data.body.device.volume_percent}`,
+							button: {
+								label: 'Listen',
+								url: data.body.item.external_urls.spotify
+							}
 					  });
 			})
 			.catch(err => res({ success: false, error: new Error(err) }));

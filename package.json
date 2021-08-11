@@ -20,7 +20,7 @@
 		"@paulcbetts/system-idle-time": "^1.0.5"
 	},
 	"scripts": {
-		"start:windows": "set DEBUG=* && node .",
+		"start": "set DEBUG=* && node .",
 		"start:linux": "DEBUG=* node ."
 	}
 }

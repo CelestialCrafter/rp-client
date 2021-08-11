@@ -34,6 +34,7 @@ const refreshStatus = async () => {
 	const isAfk = getAfk();
 
 	const processList = await psList();
+	// Gets the process with highest priority
 	const selectedProcesses = processList
 		.filter(process => options.processes.find(fp => fp.name === process.name))
 		.filter((o, i, p) => i === p.findIndex(e => e['name'] === o['name']));
@@ -45,7 +46,7 @@ const refreshStatus = async () => {
 	);
 	const process = formattedProcesses.find(fp => fp.priority == highestPriority);
 
-	const statusIndex = Math.floor(Math.random() * options.statuses.length);
+	// Creates default state errors
 	let state = null;
 	if (!process) state = { success: false, error: new Error('No Process') };
 	else if (!process.state)
@@ -58,37 +59,39 @@ const refreshStatus = async () => {
 	// If state exists, check if a button exists on the state and push it to the buttons list
 	state.success ? (state.button ? buttons.push(state.button) : null) : null;
 
+	const statusIndex = Math.floor(Math.random() * options.statuses.length);
+
 	process
 		? logRPC('RPC Update %O', {
-			executable: process.name,
-			displayName: process.display,
-			priority: process.priority,
-			imageKey: process.image,
-			status: options.statuses[statusIndex],
-			state: { ...state, error: state.error?.toString() },
-			usingState: state.success
+				executable: process.name,
+				displayName: process.display,
+				priority: process.priority,
+				imageKey: process.image,
+				status: options.statuses[statusIndex],
+				state: { ...state, error: state.error?.toString() },
+				usingState: state.success
 		  })
 		: logRPC('RPC Update %O', {
-			status: options.statuses[statusIndex]
+				status: options.statuses[statusIndex]
 		  });
 
 	process
 		? client.setActivity({
-			details: isAfk ? 'Idle' : 'Using ' + process.display,
-			state: state?.result || options.statuses[statusIndex],
-			largeImageKey: options.image,
-			largeImageText: `${client.user.username}#${client.user.discriminator}`,
-			smallImageKey: process?.image,
-			smallImageText: `${process.name} - Priority: ${process.priority}${
-				state.smallData ? ' - ' + state.smallData : ''
-			}`,
-			buttons
+				details: isAfk ? 'Idle' : state.usingText || 'Using ' + process.display,
+				state: state?.result || options.statuses[statusIndex],
+				largeImageKey: options.image,
+				largeImageText: `${client.user.username}#${client.user.discriminator}`,
+				smallImageKey: process?.image,
+				smallImageText: `${process.name} - Priority: ${process.priority}${
+					state.smallData ? ' - ' + state.smallData : ''
+				}`,
+				buttons
 		  })
 		: client.setActivity({
-			details: options.statuses[statusIndex],
-			largeImageKey: options.image,
-			largeImageText: `${client.user.username}#${client.user.discriminator}`,
-			buttons
+				details: options.statuses[statusIndex],
+				largeImageKey: options.image,
+				largeImageText: `${client.user.username}#${client.user.discriminator}`,
+				buttons
 		  });
 };
 
