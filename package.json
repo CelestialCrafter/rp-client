@@ -1,7 +1,7 @@
 {
 	"name": "rpclient",
 	"version": "1.0.0",
-	"description": "A Discord RPC Client for making your status better",
+	"description": "Uses Discord RPC to display what your doing and a status to go along with it",
 	"main": "src/app.js",
 	"author": "CelestialCrafter <celestialcraftermc@gmail.com> (https://github.com/CelestialCrafter)",
 	"license": "MIT",
@@ -14,7 +14,8 @@
 		"oauth": "^0.9.15",
 		"open": "^8.2.0",
 		"ps-list": "^7.2.0",
-		"spotify-web-api-node": "^5.0.2"
+		"spotify-web-api-node": "^5.0.2",
+		"supports-color": "^9.0.2"
 	},
 	"optionalDependencies": {
 		"@paulcbetts/system-idle-time": "^1.0.5"

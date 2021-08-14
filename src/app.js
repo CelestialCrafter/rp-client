@@ -28,10 +28,11 @@ try {
 
 const client = new RPC.Client({ transport: 'ipc' });
 
-options.processes.forEach(fp => (fp.useState ? fp.init?.() : null));
+options.processes.forEach(fp => (fp.useState ?? true ? fp.init?.() : null));
 
 const refreshStatus = async () => {
 	const isAfk = getAfk();
+	let finishedBumping = false;
 
 	const processList = await psList();
 	// Gets the process with highest priority
@@ -42,7 +43,7 @@ const refreshStatus = async () => {
 		options.processes.find(fp => fp.name === p.name)
 	);
 
-	await formattedProcesses.forEach(async fp => {
+	formattedProcesses.forEach(async fp => {
 		if (!options.bumpStateProcessesBy) return;
 		if (!fp.state) return;
 
@@ -52,8 +53,19 @@ const refreshStatus = async () => {
 		if (state.success) {
 			const fpIProcess = { ...formattedProcesses[fpIndex] };
 			formattedProcesses[fpIndex] = { ...fpIProcess, priority: fpIProcess.priority + options.bumpStateProcessesBy };
-			logMain(`State running for process ${fp.name}. Bumping priority`);
+			logMain(`State running for process ${fp.name}. Bumping priority by ${options.bumpStateProcessesBy}`);
 		};
+
+		if (fpIndex === formattedProcesses.length - 1) finishedBumping = true;
+	});
+
+	await new Promise(res => {
+		const interval = setInterval(() => {
+			if (!finishedBumping) return;
+
+			clearInterval(interval);
+			res();
+		}, 100);
 	});
 
 	const highestPriority = Math.max(
@@ -66,7 +78,7 @@ const refreshStatus = async () => {
 	if (!process) state = { success: false, error: new Error('No Process') };
 	else if (!process.state)
 		state = { success: false, error: new Error('No State') };
-	else if (!process.useState)
+	else if (process.useState ?? false)
 		state = { success: false, error: new Error('State not in use') };
 	else state = await process.state();
 

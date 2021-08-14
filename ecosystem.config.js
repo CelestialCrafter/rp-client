@@ -4,7 +4,7 @@ module.exports = {
 	apps: [
 		{
 			name: 'rp-client',
-			script: './app.js',
+			script: './src/app.js',
 			env: {
 				NODE_ENV: 'development',
 				DEBUG: '*,-axm:*'
