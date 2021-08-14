@@ -1,6 +1,6 @@
 const RPC = require('discord-rpc');
 const psList = require('ps-list');
-const options = require('./config');
+const options = require('../config');
 const debug = require('debug');
 
 require('dotenv').config();
@@ -41,6 +41,21 @@ const refreshStatus = async () => {
 	const formattedProcesses = selectedProcesses.map(p =>
 		options.processes.find(fp => fp.name === p.name)
 	);
+
+	await formattedProcesses.forEach(async fp => {
+		if (!options.bumpStateProcessesBy) return;
+		if (!fp.state) return;
+
+		const state = await fp.state();
+		const fpIndex = formattedProcesses.findIndex(fpt => fpt.name === fp.name);
+
+		if (state.success) {
+			const fpIProcess = { ...formattedProcesses[fpIndex] };
+			formattedProcesses[fpIndex] = { ...fpIProcess, priority: fpIProcess.priority + options.bumpStateProcessesBy };
+			logMain(`State running for process ${fp.name}. Bumping priority`);
+		};
+	});
+
 	const highestPriority = Math.max(
 		...formattedProcesses.map(fp => fp.priority)
 	);
@@ -63,36 +78,35 @@ const refreshStatus = async () => {
 
 	process
 		? logRPC('RPC Update %O', {
-				executable: process.name,
-				displayName: process.display,
-				priority: process.priority,
-				imageKey: process.image,
-				status: options.statuses[statusIndex],
-				state: { ...state, error: state.error?.toString() },
-				usingState: state.success
-		  })
+			executable: process.name,
+			displayName: process.display,
+			priority: process.priority,
+			imageKey: process.image,
+			status: options.statuses[statusIndex],
+			state: { ...state, error: state.error?.toString() },
+			usingState: state.success
+		})
 		: logRPC('RPC Update %O', {
-				status: options.statuses[statusIndex]
-		  });
+			status: options.statuses[statusIndex]
+		});
 
 	process
 		? client.setActivity({
-				details: isAfk ? 'Idle' : state.usingText || 'Using ' + process.display,
-				state: state?.result || options.statuses[statusIndex],
-				largeImageKey: options.image,
-				largeImageText: `${client.user.username}#${client.user.discriminator}`,
-				smallImageKey: process?.image,
-				smallImageText: `${process.name} - Priority: ${process.priority}${
-					state.smallData ? ' - ' + state.smallData : ''
+			details: isAfk ? 'Idle' : state.usingText || 'Using ' + process.display,
+			state: state?.result || options.statuses[statusIndex],
+			largeImageKey: options.image,
+			largeImageText: `${client.user.username}#${client.user.discriminator}`,
+			smallImageKey: process?.image,
+			smallImageText: `${process.name} - Priority: ${process.priority}${state.smallData ? ' - ' + state.smallData : ''
 				}`,
-				buttons
-		  })
+			buttons
+		})
 		: client.setActivity({
-				details: options.statuses[statusIndex],
-				largeImageKey: options.image,
-				largeImageText: `${client.user.username}#${client.user.discriminator}`,
-				buttons
-		  });
+			details: options.statuses[statusIndex],
+			largeImageKey: options.image,
+			largeImageText: `${client.user.username}#${client.user.discriminator}`,
+			buttons
+		});
 };
 
 client.on('ready', () => {

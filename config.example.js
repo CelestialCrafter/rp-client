@@ -3,6 +3,7 @@ const config = {
 	image: 'cool_image_key',
 	afkTime: 5 * 60 * 1000,
 	refreshDelay: 10 * 1000,
+	bumpStateProcessesBy: 10,
 	statuses: ['status1', 'status2'],
 	button: {
 		label: 'cool link',

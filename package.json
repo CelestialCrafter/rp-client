@@ -2,7 +2,7 @@
 	"name": "rpclient",
 	"version": "1.0.0",
 	"description": "A Discord RPC Client for making your status better",
-	"main": "app.js",
+	"main": "src/app.js",
 	"author": "CelestialCrafter <celestialcraftermc@gmail.com> (https://github.com/CelestialCrafter)",
 	"license": "MIT",
 	"dependencies": {

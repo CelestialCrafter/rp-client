@@ -3,7 +3,7 @@ const app = require('express')();
 const open = require('open');
 const crypto = require('crypto');
 const { writeFileSync, readFileSync, existsSync, mkdirSync } = require('fs');
-const { join } = require('path');
+const { join, resolve } = require('path');
 const options = require('./config.js');
 const debug = require('debug');
 
@@ -22,7 +22,7 @@ const spotifyApi = new SpotifyWebApi({
 	clientSecret: options.clientSecret
 });
 
-const dataPath = join(__dirname, '../../data/');
+const dataPath = resolve('data/');
 const credentialPath = join(dataPath, 'spotifyCredentials.txt');
 
 const spotify = () =>
@@ -39,14 +39,14 @@ const spotify = () =>
 				data.body.device.is_private_session
 					? res({ success: false, error: new Error('Private Session') })
 					: res({
-							success: true,
-							result: `${data.body.item.artists[0].name} - ${data.body.item.name}`,
-							smallData: `Volume: ${data.body.device.volume_percent}`,
-							button: {
-								label: 'Listen',
-								url: data.body.item.external_urls.spotify
-							}
-					  });
+						success: true,
+						result: `${data.body.item.artists[0].name} - ${data.body.item.name}`,
+						smallData: `Volume: ${data.body.device.volume_percent}`,
+						button: {
+							label: 'Listen',
+							url: data.body.item.external_urls.spotify
+						}
+					});
 			})
 			.catch(err => res({ success: false, error: new Error(err) }));
 	});
