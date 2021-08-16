@@ -18,6 +18,7 @@ logMain(`Running in ${global.process.env.NODE_ENV} environment`);
 let getAfk = () => 0;
 
 try {
+	// eslint-disable-next-line global-require, import/no-extraneous-dependencies
 	const system = require('@paulcbetts/system-idle-time');
 	getAfk = () => system.getIdleTime() >= options.afkTime;
 	logAFK('AFK Enabled');
@@ -77,7 +78,7 @@ const refreshStatus = async () => {
 	const highestPriority = Math.max(
 		...formattedProcesses.map((fp) => fp.priority)
 	);
-	const process = formattedProcesses.find((fp) => fp.priority == highestPriority);
+	const process = formattedProcesses.find((fp) => fp.priority === highestPriority);
 
 	// Creates default state errors
 	let state = null;
@@ -90,10 +91,12 @@ const refreshStatus = async () => {
 
 	const buttons = [options.button];
 	// If state exists, check if a button exists on the state and push it to the buttons list
+	// eslint-disable-next-line no-unused-expressions, no-nested-ternary
 	state.success ? (state.button ? buttons.push(state.button) : null) : null;
 
 	const statusIndex = Math.floor(Math.random() * options.statuses.length);
 
+	// eslint-disable-next-line no-unused-expressions
 	process
 		? logRPC('RPC Update %O', {
 			executable: process.name,
@@ -103,11 +106,12 @@ const refreshStatus = async () => {
 			status: options.statuses[statusIndex],
 			state: { ...state, error: state.error?.toString() },
 			usingState: state.success
-		  })
+		})
 		: logRPC('RPC Update %O', {
 			status: options.statuses[statusIndex]
-		  });
+		});
 
+	// eslint-disable-next-line no-unused-expressions
 	process
 		? client.request('SET_ACTIVITY', {
 			pid: global.process.pid,
@@ -131,13 +135,13 @@ const refreshStatus = async () => {
 				instance: true,
 				buttons
 			}
-		  })
+		})
 		: client.setActivity({
 			details: options.statuses[statusIndex],
 			largeImageKey: options.image,
 			largeImageText: `${client.user.username}#${client.user.discriminator}`,
 			buttons
-		  });
+		});
 };
 
 client.on('ready', () => {

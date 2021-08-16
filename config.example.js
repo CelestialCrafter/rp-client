@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 const config = {
 	clientId: '823637382967328779',
 	image: 'cool_image_key',
@@ -21,7 +22,7 @@ const config = {
 			name: 'Spotify.exe',
 			image: 'spotify',
 			priority: 1,
-			state: require('./states/spotify.js'),
+			state: require('./src/states/spotify/spotify'),
 			useState: true
 		},
 		{

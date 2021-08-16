@@ -58,8 +58,11 @@ const startAnimeServer = () => {
 		const dateTime = new Date(currentTime.currentTime);
 		const dateDuration = new Date(currentTime.duration);
 
+		const formatTime = `${dateTime.getMinutes()}:${dateTime.getSeconds()}`;
+		const formatDuration = `${dateDuration.getMinutes()}:${dateDuration.getSeconds()}`;
+
 		logAnime(
-			`Time: ${dateTime.getMinutes()}:${dateTime.getSeconds()}/${dateDuration.getMinutes()}:${dateDuration.getSeconds()}`
+			`Time: ${formatTime}/${formatDuration}`
 		);
 		setTimeout(() => {
 			if (Date.now() - timeLastRequestTimestamp > 10 * 1000) {

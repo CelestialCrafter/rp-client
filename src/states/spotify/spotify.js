@@ -27,7 +27,7 @@ const spotifyApi = new SpotifyWebApi({
 const dataPath = resolve('data/');
 const credentialPath = join(dataPath, 'spotifyCredentials.txt');
 
-const spotify = () => new Promise((res, rej) => {
+const spotify = () => new Promise(res => {
 	spotifyApi
 		.getMyCurrentPlaybackState()
 		.then((data) => {
@@ -36,6 +36,8 @@ const spotify = () => new Promise((res, rej) => {
 				!options.allowedDevices.includes(data.body.device.id)
 					&& !options.allowedDevices.includes(data.body.device.name)
 			) return;
+
+			// eslint-disable-next-line no-unused-expressions
 			data.body.device.is_private_session
 				? res({ success: false, error: new Error('Private Session') })
 				: res({
@@ -46,7 +48,7 @@ const spotify = () => new Promise((res, rej) => {
 						label: 'Listen',
 						url: data.body.item.external_urls.spotify
 					}
-					  });
+				});
 		})
 		.catch((err) => res({ success: false, error: new Error(err) }));
 });
