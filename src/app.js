@@ -1,7 +1,7 @@
 const RPC = require('discord-rpc');
 const psList = require('ps-list');
-const options = require('../config');
 const debug = require('debug');
+const options = require('../config');
 
 require('dotenv').config();
 
@@ -19,7 +19,7 @@ let getAfk = () => 0;
 
 try {
 	const system = require('@paulcbetts/system-idle-time');
-	getAfk = () => (system.getIdleTime() >= options.afkTime ? true : false);
+	getAfk = () => system.getIdleTime() >= options.afkTime;
 	logAFK('AFK Enabled');
 } catch (e) {
 	logAFK('AFK Disabled');
@@ -28,10 +28,10 @@ try {
 
 const client = new RPC.Client({ transport: 'ipc' });
 
-options.processes.forEach(fp => (fp.useState ?? true ? fp.init?.() : null));
+options.processes.forEach((fp) => (fp.useState ?? true ? fp.init?.() : null));
 
 const refreshStatus = async () => {
-	let stateCache = {};
+	const stateCache = {};
 	const isAfk = getAfk();
 	let finishedBumping = false;
 
@@ -39,28 +39,33 @@ const refreshStatus = async () => {
 
 	// Gets the process with highest priority
 	const selectedProcesses = processList
-		.filter(process => options.processes.find(fp => fp.name === process.name))
-		.filter((o, i, p) => i === p.findIndex(e => e['name'] === o['name']));
-	const formattedProcesses = selectedProcesses.map(p =>
-		options.processes.find(fp => fp.name === p.name)
-	);
+		.filter((process) => options.processes.find((fp) => fp.name === process.name))
+		.filter((o, i, p) => i === p.findIndex((e) => e.name === o.name));
+	const formattedProcesses = selectedProcesses.map((p) => options.processes.find((fp) => fp.name === p.name));
 
-	formattedProcesses.forEach(fp => {
-		const fpIndex = formattedProcesses.findIndex(fpt => fpt.name === fp.name);
+	formattedProcesses.forEach((fp) => {
+		const fpIndex = formattedProcesses.findIndex((fpt) => fpt.name === fp.name);
 		const fpIProcess = { ...formattedProcesses[fpIndex] };
 
-		if (options.bumpStateProcessesBy && fp.state) fp.state().then(state => {
-			stateCache[fp.name] = state;
-			if (state.success) {
-				formattedProcesses[fpIndex] = { ...fpIProcess, priority: fpIProcess.priority + options.bumpStateProcessesBy };
-				logMain(`State running for process ${fp.name}. Bumping priority by ${options.bumpStateProcessesBy}`);
-			}
-		});
+		if (options.bumpStateProcessesBy && fp.state) {
+			fp.state().then((state) => {
+				stateCache[fp.name] = state;
+				if (state.success) {
+					formattedProcesses[fpIndex] = {
+						...fpIProcess,
+						priority: fpIProcess.priority + options.bumpStateProcessesBy
+					};
+					logMain(
+						`State running for process ${fp.name}. Bumping priority by ${options.bumpStateProcessesBy}`
+					);
+				}
+			});
+		}
 
 		if (fpIndex === formattedProcesses.length - 1) finishedBumping = true;
 	});
 
-	await new Promise(res => {
+	await new Promise((res) => {
 		const interval = setInterval(() => {
 			if (!finishedBumping) return;
 
@@ -70,18 +75,16 @@ const refreshStatus = async () => {
 	});
 
 	const highestPriority = Math.max(
-		...formattedProcesses.map(fp => fp.priority)
+		...formattedProcesses.map((fp) => fp.priority)
 	);
-	const process = formattedProcesses.find(fp => fp.priority == highestPriority);
+	const process = formattedProcesses.find((fp) => fp.priority == highestPriority);
 
 	// Creates default state errors
 	let state = null;
 	if (!process) state = { success: false, error: new Error('No Process') };
-	else if (!process.state)
-		state = { success: false, error: new Error('No State') };
-	else if (process.useState ?? false)
-		state = { success: false, error: new Error('State not in use') };
-	else state = stateCache[process.name] ?? await process.state();
+	else if (!process.state) state = { success: false, error: new Error('No State') };
+	else if (process.useState ?? false) state = { success: false, error: new Error('State not in use') };
+	else state = stateCache[process.name] ?? (await process.state());
 
 	if (!stateCache[process.name]) stateCache[process.name] = state;
 
@@ -100,23 +103,26 @@ const refreshStatus = async () => {
 			status: options.statuses[statusIndex],
 			state: { ...state, error: state.error?.toString() },
 			usingState: state.success
-		})
+		  })
 		: logRPC('RPC Update %O', {
 			status: options.statuses[statusIndex]
-		});
+		  });
 
 	process
 		? client.request('SET_ACTIVITY', {
 			pid: global.process.pid,
 			activity: {
-				details: isAfk ? 'Idle' : state.usingText || 'Using ' + process.display,
+				details: isAfk
+					? 'Idle'
+					: state.usingText || `Using ${process.display}`,
 				state: state?.result || options.statuses[statusIndex],
 				assets: {
 					large_image: options.image,
 					large_text: `${client.user.username}#${client.user.discriminator}`,
 					small_image: process?.image,
-					small_text: `${process.name} - Priority: ${process.priority}${state.smallData ? ' - ' + state.smallData : ''
-						}`,
+					small_text: `${process.name} - Priority: ${process.priority}${
+						state.smallData ? ` - ${state.smallData}` : ''
+					}`
 				},
 				timestamps: {
 					start: state?.startTimestamp,
@@ -125,13 +131,13 @@ const refreshStatus = async () => {
 				instance: true,
 				buttons
 			}
-		})
+		  })
 		: client.setActivity({
 			details: options.statuses[statusIndex],
 			largeImageKey: options.image,
 			largeImageText: `${client.user.username}#${client.user.discriminator}`,
 			buttons
-		});
+		  });
 };
 
 client.on('ready', () => {

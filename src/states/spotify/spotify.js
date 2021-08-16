@@ -2,10 +2,12 @@ const SpotifyWebApi = require('spotify-web-api-node');
 const app = require('express')();
 const open = require('open');
 const crypto = require('crypto');
-const { writeFileSync, readFileSync, existsSync, mkdirSync } = require('fs');
+const {
+	writeFileSync, readFileSync, existsSync, mkdirSync
+} = require('fs');
 const { join, resolve } = require('path');
-const options = require('./config.js');
 const debug = require('debug');
+const options = require('./config.js');
 
 const logHttp = debug('http');
 const logSpotify = debug('feature:spotify');
@@ -25,54 +27,50 @@ const spotifyApi = new SpotifyWebApi({
 const dataPath = resolve('data/');
 const credentialPath = join(dataPath, 'spotifyCredentials.txt');
 
-const spotify = () =>
-	new Promise((res, rej) => {
-		spotifyApi
-			.getMyCurrentPlaybackState()
-			.then(data => {
-				if (!data.body.device) return;
-				if (
-					!options.allowedDevices.includes(data.body.device.id) &&
-					!options.allowedDevices.includes(data.body.device.name)
-				)
-					return;
-				data.body.device.is_private_session
-					? res({ success: false, error: new Error('Private Session') })
-					: res({
-						success: true,
-						result: `${data.body.item.artists[0].name} - ${data.body.item.name}`,
-						smallData: `Volume: ${data.body.device.volume_percent}`,
-						button: {
-							label: 'Listen',
-							url: data.body.item.external_urls.spotify
-						}
-					});
-			})
-			.catch(err => res({ success: false, error: new Error(err) }));
-	});
+const spotify = () => new Promise((res, rej) => {
+	spotifyApi
+		.getMyCurrentPlaybackState()
+		.then((data) => {
+			if (!data.body.device) return;
+			if (
+				!options.allowedDevices.includes(data.body.device.id)
+					&& !options.allowedDevices.includes(data.body.device.name)
+			) return;
+			data.body.device.is_private_session
+				? res({ success: false, error: new Error('Private Session') })
+				: res({
+					success: true,
+					result: `${data.body.item.artists[0].name} - ${data.body.item.name}`,
+					smallData: `Volume: ${data.body.device.volume_percent}`,
+					button: {
+						label: 'Listen',
+						url: data.body.item.external_urls.spotify
+					}
+					  });
+		})
+		.catch((err) => res({ success: false, error: new Error(err) }));
+});
 
 const getUserCredentials = () => {
-	const listener = app.listen(52752, () =>
-		logHttp('Listening for spotify auth on port 52752')
-	);
+	const listener = app.listen(52752, () => logHttp('Listening for spotify auth on port 52752'));
 
 	app.get('/', (req, res) => {
 		res.sendFile(join(__dirname, '../auth.html'));
 		if (!req.query.code) return console.error(new Error('No Auth Code'));
 		spotifyApi
 			.authorizationCodeGrant(req.query.code)
-			.then(data => {
+			.then((data) => {
 				spotifyApi.setAccessToken(data.body.access_token);
 				spotifyApi.setRefreshToken(data.body.refresh_token);
 				try {
-					writeFileSync(credentialPath, data.body['refresh_token']);
+					writeFileSync(credentialPath, data.body.refresh_token);
 				} catch (err) {
 					console.error(err);
 				}
 				listener.close();
 				logSpotify('Spotify has been authorized');
 			})
-			.catch(err => console.error(new Error(err.body.error.message)));
+			.catch((err) => console.error(new Error(err.body.error.message)));
 	});
 
 	const authUrl = spotifyApi.createAuthorizeURL(
@@ -87,11 +85,11 @@ const authorizeSpotify = () => {
 		spotifyApi.setRefreshToken(readFileSync(credentialPath));
 		spotifyApi
 			.refreshAccessToken()
-			.then(data => {
-				spotifyApi.setAccessToken(data.body['access_token']);
+			.then((data) => {
+				spotifyApi.setAccessToken(data.body.access_token);
 				logSpotify('Spotify has been authorized');
 			})
-			.catch(err => {
+			.catch((err) => {
 				logSpotifyError(err);
 				logSpotifyError('Requesting user authentication');
 				getUserCredentials();

@@ -10,35 +10,50 @@
 // @grant        unsafeWindow
 // ==/UserScript==
 
-'use strict';
-
 const animepahe = () => {
-    setTimeout(() => {
-        const teInfo = document.getElementsByClassName('theatre-info')[0].children[1].innerText.split('\n')[1].split(' - ');
-        let anime = {
-            title: teInfo[0],
-            episode: teInfo[1]
-        };
+	setTimeout(() => {
+		const teInfo = document
+			.getElementsByClassName('theatre-info')[0]
+			.children[1].innerText.split('\n')[1]
+			.split(' - ');
+		const anime = {
+			title: teInfo[0],
+			episode: teInfo[1]
+		};
 
-        // URIEncodes every value in the object
-        // eslint-disable-next-line
-        Object.keys(anime).forEach(key => anime[key] = encodeURIComponent(anime[key]));
+		// URIEncodes every value in the object
+		// eslint-disable-next-line
+		Object.keys(anime).forEach(
+			(key) => (anime[key] = encodeURIComponent(anime[key]))
+		);
 
-        setInterval(() => fetch(`http://localhost:49948/anime?title=${anime.title}&episode=${anime.episode}`, { mode: 'no-cors' }), 15 * 1000);
-    }, 3 * 1000);
+		setInterval(
+			() => fetch(
+				`http://localhost:49948/anime?title=${anime.title}&episode=${anime.episode}`,
+				{ mode: 'no-cors' }
+			),
+			15 * 1000
+		);
+	}, 3 * 1000);
 };
 
 const kwik = () => {
-    let timeData = { currentTime: 0, duration: 0 };
+	const timeData = { currentTime: 0, duration: 0 };
 
-    const player = document.getElementById('kwikPlayer');
+	const player = document.getElementById('kwikPlayer');
 
-    player.addEventListener('timeupdate', () => {
-        timeData.currentTime = player.currentTime;
-        timeData.duration = player.duration;
-    });
+	player.addEventListener('timeupdate', () => {
+		timeData.currentTime = player.currentTime;
+		timeData.duration = player.duration;
+	});
 
-    setInterval(() => fetch(`http://localhost:49948/time?currentTime=${timeData.currentTime}&duration=${timeData.duration}`, { mode: 'no-cors' }), 5 * 1000);
+	setInterval(
+		() => fetch(
+			`http://localhost:49948/time?currentTime=${timeData.currentTime}&duration=${timeData.duration}`,
+			{ mode: 'no-cors' }
+		),
+		5 * 1000
+	);
 };
 
 document.domain === 'animepahe.com' ? animepahe() : kwik();

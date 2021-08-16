@@ -10,21 +10,21 @@ let currentTime = null;
 let animeLastRequestTimestamp = 0;
 let timeLastRequestTimestamp = 0;
 
-const animepahe = () =>
-	new Promise((res, rej) => {
-		const time = Date.now();
+const animepahe = () => new Promise(res => {
+	const time = Date.now();
 
-		if (!currentAnime) res({ success: false, error: new Error('No Anime') });
-		if (!currentTime) res({ success: false, error: new Error('No Time') });
-		else
-			res({
-				success: true,
-				result: `${currentAnime.title} - Episode ${currentAnime.episode}`,
-				usingText: 'Watching Anime',
-				startTimestamp: time,
-				endTimestamp: time + (currentTime.duration - currentTime.currentTime)
-			});
-	});
+	if (!currentAnime) res({ success: false, error: new Error('No Anime') });
+	if (!currentTime) res({ success: false, error: new Error('No Time') });
+	else {
+		res({
+			success: true,
+			result: `${currentAnime.title} - Episode ${currentAnime.episode}`,
+			usingText: 'Watching Anime',
+			startTimestamp: time,
+			endTimestamp: time + (currentTime.duration - currentTime.currentTime)
+		});
+	}
+});
 
 const startAnimeServer = () => {
 	app.get('/anime', (req, res) => {
@@ -49,13 +49,18 @@ const startAnimeServer = () => {
 	});
 
 	app.get('/time', (req, res) => {
-		currentTime = { currentTime: req.query.currentTime * 1000, duration: req.query.duration * 1000 };
+		currentTime = {
+			currentTime: req.query.currentTime * 1000,
+			duration: req.query.duration * 1000
+		};
 		timeLastRequestTimestamp = Date.now();
 
 		const dateTime = new Date(currentTime.currentTime);
 		const dateDuration = new Date(currentTime.duration);
 
-		logAnime(`Time: ${dateTime.getMinutes()}:${dateTime.getSeconds()}/${dateDuration.getMinutes()}:${dateDuration.getSeconds()}`);
+		logAnime(
+			`Time: ${dateTime.getMinutes()}:${dateTime.getSeconds()}/${dateDuration.getMinutes()}:${dateDuration.getSeconds()}`
+		);
 		setTimeout(() => {
 			if (Date.now() - timeLastRequestTimestamp > 10 * 1000) {
 				currentTime = null;
