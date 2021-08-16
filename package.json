@@ -21,7 +21,7 @@
 		"@paulcbetts/system-idle-time": "^1.0.5"
 	},
 	"scripts": {
-		"start": "set DEBUG=* && node .",
-		"start:linux": "DEBUG=* node ."
+		"start": "set NODE_ENV=development&&set DEBUG=*&& node .",
+		"start:linux": "NODE_ENV=devlopment DEBUG=* node ."
 	}
 }

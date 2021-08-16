@@ -1,3 +1,5 @@
+// Bottom of https://osu.ppy.sh/home/account/edit
+
 const config = {
 	clientId: '8060',
 	clientSecret: 'f608f2204104654563470ff45f51fae5936c6a4f',

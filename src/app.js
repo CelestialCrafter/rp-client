@@ -31,10 +31,12 @@ const client = new RPC.Client({ transport: 'ipc' });
 options.processes.forEach(fp => (fp.useState ?? true ? fp.init?.() : null));
 
 const refreshStatus = async () => {
+	let stateCache = {};
 	const isAfk = getAfk();
 	let finishedBumping = false;
 
 	const processList = await psList();
+
 	// Gets the process with highest priority
 	const selectedProcesses = processList
 		.filter(process => options.processes.find(fp => fp.name === process.name))
@@ -43,18 +45,17 @@ const refreshStatus = async () => {
 		options.processes.find(fp => fp.name === p.name)
 	);
 
-	formattedProcesses.forEach(async fp => {
-		if (!options.bumpStateProcessesBy) return;
-		if (!fp.state) return;
-
-		const state = await fp.state();
+	formattedProcesses.forEach(fp => {
 		const fpIndex = formattedProcesses.findIndex(fpt => fpt.name === fp.name);
+		const fpIProcess = { ...formattedProcesses[fpIndex] };
 
-		if (state.success) {
-			const fpIProcess = { ...formattedProcesses[fpIndex] };
-			formattedProcesses[fpIndex] = { ...fpIProcess, priority: fpIProcess.priority + options.bumpStateProcessesBy };
-			logMain(`State running for process ${fp.name}. Bumping priority by ${options.bumpStateProcessesBy}`);
-		};
+		if (options.bumpStateProcessesBy && fp.state) fp.state().then(state => {
+			stateCache[fp.name] = state;
+			if (state.success) {
+				formattedProcesses[fpIndex] = { ...fpIProcess, priority: fpIProcess.priority + options.bumpStateProcessesBy };
+				logMain(`State running for process ${fp.name}. Bumping priority by ${options.bumpStateProcessesBy}`);
+			}
+		});
 
 		if (fpIndex === formattedProcesses.length - 1) finishedBumping = true;
 	});
@@ -80,7 +81,9 @@ const refreshStatus = async () => {
 		state = { success: false, error: new Error('No State') };
 	else if (process.useState ?? false)
 		state = { success: false, error: new Error('State not in use') };
-	else state = await process.state();
+	else state = stateCache[process.name] ?? await process.state();
+
+	if (!stateCache[process.name]) stateCache[process.name] = state;
 
 	const buttons = [options.button];
 	// If state exists, check if a button exists on the state and push it to the buttons list
@@ -103,15 +106,25 @@ const refreshStatus = async () => {
 		});
 
 	process
-		? client.setActivity({
-			details: isAfk ? 'Idle' : state.usingText || 'Using ' + process.display,
-			state: state?.result || options.statuses[statusIndex],
-			largeImageKey: options.image,
-			largeImageText: `${client.user.username}#${client.user.discriminator}`,
-			smallImageKey: process?.image,
-			smallImageText: `${process.name} - Priority: ${process.priority}${state.smallData ? ' - ' + state.smallData : ''
-				}`,
-			buttons
+		? client.request('SET_ACTIVITY', {
+			pid: global.process.pid,
+			activity: {
+				details: isAfk ? 'Idle' : state.usingText || 'Using ' + process.display,
+				state: state?.result || options.statuses[statusIndex],
+				assets: {
+					large_image: options.image,
+					large_text: `${client.user.username}#${client.user.discriminator}`,
+					small_image: process?.image,
+					small_text: `${process.name} - Priority: ${process.priority}${state.smallData ? ' - ' + state.smallData : ''
+						}`,
+				},
+				timestamps: {
+					start: state?.startTimestamp,
+					end: state?.endTimestamp
+				},
+				instance: true,
+				buttons
+			}
 		})
 		: client.setActivity({
 			details: options.statuses[statusIndex],
