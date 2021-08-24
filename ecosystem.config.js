@@ -1,10 +1,12 @@
 // PM2 Ecosystem
 
+const { join } = require('path');
+
 module.exports = {
 	apps: [
 		{
 			name: 'rp-client',
-			script: './src/app.js',
+			script: join(__dirname, 'src/app.js'),
 			env: {
 				NODE_ENV: 'development',
 				DEBUG: '*,-axm:*',

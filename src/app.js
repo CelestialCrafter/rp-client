@@ -1,6 +1,7 @@
 const RPC = require('discord-rpc');
 const psList = require('ps-list');
 const debug = require('debug');
+
 const options = require('../config');
 
 require('dotenv').config();
@@ -8,6 +9,7 @@ require('dotenv').config();
 const logAFK = debug('feature:afk');
 const logAFKError = logAFK.extend('error');
 const logMain = debug('main');
+const logMainError = logMain.extend('error');
 const logRPC = debug('rpc');
 
 debug.log = console.info.bind(console);
@@ -124,8 +126,8 @@ const refreshStatus = async () => {
 					large_image: options.image,
 					large_text: `${client.user.username}#${client.user.discriminator}`,
 					small_image: process?.image,
-					small_text: `${process.name} - Priority: ${process.priority}${
-						state.smallData ? ` - ${state.smallData}` : ''
+					// eslint-disable-next-line max-len
+					small_text: `${process.name} - Priority: ${process.priority}${state.smallData ? ` - ${state.smallData}` : ''
 					}`
 				},
 				timestamps: {
@@ -155,4 +157,4 @@ client.on('ready', () => {
 	logMain(`User ID: ${client.user.id}`);
 });
 
-client.login({ clientId: options.clientId });
+client.login({ clientId: options.clientId }).catch(error => logMainError(error));
