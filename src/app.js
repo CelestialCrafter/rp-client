@@ -18,6 +18,7 @@ logAFKError.log = console.error.bind(console);
 // @TODO Add README to states
 
 logMain(`Running in ${process.env.NODE_ENV} environment`);
+logMain(`Running from ${require('path').resolve('.')}`);
 
 let getAfk = () => 0;
 
@@ -60,7 +61,7 @@ const refreshStatus = async () => {
 		if (state.success) {
 			bumpedProcesses.push(fp);
 			logMain(
-				`State running for process ${fp.name}. Bumping priority by ${options.bumpStateProcessesBy}`
+				`State running for process ${fp.name} Bumping priority by ${options.bumpStateProcessesBy}`
 			);
 		}
 	}));

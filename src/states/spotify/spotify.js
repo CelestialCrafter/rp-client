@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const {
 	writeFileSync, readFileSync, existsSync, mkdirSync
 } = require('fs');
-const { join, resolve } = require('path');
+const { join } = require('path');
 const debug = require('debug');
 const options = require('./config.js');
 
@@ -24,7 +24,7 @@ const spotifyApi = new SpotifyWebApi({
 	clientSecret: options.clientSecret
 });
 
-const dataPath = resolve('data/');
+const dataPath = join(__dirname, 'data/');
 const credentialPath = join(dataPath, 'spotifyCredentials.txt');
 
 const getUserCredentials = () => {
