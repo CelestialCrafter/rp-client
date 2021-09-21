@@ -23,7 +23,7 @@ const config = {
 			image: 'spotify',
 			priority: 1,
 			state: require('./src/states/spotify/spotify'),
-			useState: true
+			init: require('./src/states/spotify/spotify').init
 		},
 		{
 			display: 'Visual Studio Code',

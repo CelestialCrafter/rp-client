@@ -15,15 +15,13 @@ const animepahe = () => new Promise(res => {
 
 	if (!currentAnime) res({ success: false, error: new Error('No Anime') });
 	if (!currentTime) res({ success: false, error: new Error('No Time') });
-	else {
-		res({
-			success: true,
-			result: `${currentAnime.title} - Episode ${currentAnime.episode}`,
-			usingText: 'Watching Anime',
-			startTimestamp: time,
-			endTimestamp: time + (currentTime.duration - currentTime.currentTime)
-		});
-	}
+	else res({
+		success: true,
+		result: `${currentAnime.title} - Episode ${currentAnime.episode}`,
+		usingText: 'Watching Anime',
+		startTimestamp: time,
+		endTimestamp: time + (currentTime.duration - currentTime.currentTime)
+	});
 });
 
 const startAnimeServer = () => {

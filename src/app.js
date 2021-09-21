@@ -15,7 +15,9 @@ const logRPC = debug('rpc');
 debug.log = console.info.bind(console);
 logAFKError.log = console.error.bind(console);
 
-logMain(`Running in ${global.process.env.NODE_ENV} environment`);
+// @TODO Add README to states
+
+logMain(`Running in ${process.env.NODE_ENV} environment`);
 
 let getAfk = () => 0;
 
@@ -31,12 +33,12 @@ try {
 
 const client = new RPC.Client({ transport: 'ipc' });
 
-options.processes.forEach((fp) => (fp.useState ?? true ? fp.init?.() : null));
+options.processes.forEach(fp => fp.init?.());
 
 const refreshStatus = async () => {
 	const stateCache = {};
 	const isAfk = getAfk();
-	let finishedBumping = false;
+	const bumpedProcesses = [];
 
 	const processList = await psList();
 
@@ -44,38 +46,29 @@ const refreshStatus = async () => {
 	const selectedProcesses = processList
 		.filter((process) => options.processes.find((fp) => fp.name === process.name))
 		.filter((o, i, p) => i === p.findIndex((e) => e.name === o.name));
-	const formattedProcesses = selectedProcesses.map((p) => options.processes.find((fp) => fp.name === p.name));
+	const formattedProcessesUB = selectedProcesses.map((p) => options.processes.find((fp) => fp.name === p.name));
 
-	formattedProcesses.forEach((fp) => {
-		const fpIndex = formattedProcesses.findIndex((fpt) => fpt.name === fp.name);
-		const fpIProcess = { ...formattedProcesses[fpIndex] };
+	// eslint-disable-next-line no-restricted-syntax
+	const stateArray = [];
 
-		if (options.bumpStateProcessesBy && fp.state) {
-			fp.state().then((state) => {
-				stateCache[fp.name] = state;
-				if (state.success) {
-					formattedProcesses[fpIndex] = {
-						...fpIProcess,
-						priority: fpIProcess.priority + options.bumpStateProcessesBy
-					};
-					logMain(
-						`State running for process ${fp.name}. Bumping priority by ${options.bumpStateProcessesBy}`
-					);
-				}
-			});
+	formattedProcessesUB.forEach(fp => {
+		if (options.bumpStateProcessesBy && fp.state) stateArray.push({ fp, state: fp.state() });
+	});
+
+	await Promise.all(stateArray.map(s => s.state)).then(states => states.forEach((state, index) => {
+		const { fp } = stateArray[index];
+		if (state.success) {
+			bumpedProcesses.push(fp);
+			logMain(
+				`State running for process ${fp.name}. Bumping priority by ${options.bumpStateProcessesBy}`
+			);
 		}
+	}));
 
-		if (fpIndex === formattedProcesses.length - 1) finishedBumping = true;
-	});
-
-	await new Promise((res) => {
-		const interval = setInterval(() => {
-			if (!finishedBumping) return;
-
-			clearInterval(interval);
-			res();
-		}, 100);
-	});
+	/* eslint-disable max-len */
+	const formattedProcesses = formattedProcessesUB.filter(fp => !bumpedProcesses.map(bfp => bfp.name).includes(fp.name));
+	bumpedProcesses.forEach(bp => formattedProcesses.push({ ...bp, priority: bp.priority + options.bumpStateProcessesBy }));
+	/* eslint-enable max-len */
 
 	const highestPriority = Math.max(
 		...formattedProcesses.map((fp) => fp.priority)
@@ -97,23 +90,22 @@ const refreshStatus = async () => {
 	state.success ? (state.button ? buttons.push(state.button) : null) : null;
 
 	const statusIndex = Math.floor(Math.random() * options.statuses.length);
+	const nonOptionalLogs = {
+		status: options.statuses[statusIndex],
+		state: { ...state, error: state.error?.toString() },
+		isAfk
+	};
 
-	// eslint-disable-next-line no-unused-expressions
 	process
 		? logRPC('RPC Update %O', {
 			executable: process.name,
 			displayName: process.display,
 			priority: process.priority,
 			imageKey: process.image,
-			status: options.statuses[statusIndex],
-			state: { ...state, error: state.error?.toString() },
-			usingState: state.success
+			...nonOptionalLogs
 		})
-		: logRPC('RPC Update %O', {
-			status: options.statuses[statusIndex]
-		});
+		: logRPC('RPC Update %O', nonOptionalLogs);
 
-	// eslint-disable-next-line no-unused-expressions
 	process
 		? client.request('SET_ACTIVITY', {
 			pid: global.process.pid,
@@ -128,7 +120,7 @@ const refreshStatus = async () => {
 					small_image: process?.image,
 					// eslint-disable-next-line max-len
 					small_text: `${process.name} - Priority: ${process.priority}${state.smallData ? ` - ${state.smallData}` : ''
-					}`
+						}`
 				},
 				timestamps: {
 					start: state?.startTimestamp,
@@ -148,7 +140,6 @@ const refreshStatus = async () => {
 
 client.on('ready', () => {
 	client.clearActivity();
-	refreshStatus();
 	setInterval(() => {
 		refreshStatus();
 	}, options.refreshDelay);
@@ -157,4 +148,7 @@ client.on('ready', () => {
 	logMain(`User ID: ${client.user.id}`);
 });
 
-client.login({ clientId: options.clientId }).catch(error => logMainError(error));
+client.login({ clientId: options.clientId }).catch(error => {
+	logMainError(error);
+	process.exit(0);
+});

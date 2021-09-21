@@ -27,38 +27,12 @@ const spotifyApi = new SpotifyWebApi({
 const dataPath = resolve('data/');
 const credentialPath = join(dataPath, 'spotifyCredentials.txt');
 
-const spotify = () => new Promise(res => {
-	spotifyApi
-		.getMyCurrentPlaybackState()
-		.then((data) => {
-			if (!data.body.device) return;
-			if (
-				!options.allowedDevices.includes(data.body.device.id)
-					&& !options.allowedDevices.includes(data.body.device.name)
-			) return;
-
-			// eslint-disable-next-line no-unused-expressions
-			data.body.device.is_private_session
-				? res({ success: false, error: new Error('Private Session') })
-				: res({
-					success: true,
-					result: `${data.body.item.artists[0].name} - ${data.body.item.name}`,
-					smallData: `Volume: ${data.body.device.volume_percent}`,
-					button: {
-						label: 'Listen',
-						url: data.body.item.external_urls.spotify
-					}
-				});
-		})
-		.catch((err) => res({ success: false, error: new Error(err) }));
-});
-
 const getUserCredentials = () => {
 	const listener = app.listen(52752, () => logHttp('Listening for spotify auth on port 52752'));
 
 	app.get('/', (req, res) => {
 		res.sendFile(join(__dirname, '../auth.html'));
-		if (!req.query.code) return console.error(new Error('No Auth Code'));
+		if (!req.query.code) return logSpotifyError('No Auth Code');
 		spotifyApi
 			.authorizationCodeGrant(req.query.code)
 			.then((data) => {
@@ -67,16 +41,16 @@ const getUserCredentials = () => {
 				try {
 					writeFileSync(credentialPath, data.body.refresh_token);
 				} catch (err) {
-					console.error(err);
+					logSpotifyError(err);
 				}
 				listener.close();
 				logSpotify('Spotify has been authorized');
 			})
-			.catch((err) => console.error(new Error(err.body.error.message)));
+			.catch(err => logSpotifyError(err.body.error.message));
 	});
 
 	const authUrl = spotifyApi.createAuthorizeURL(
-		['user-read-playback-state', 'user-read-currently-playing'],
+		['user-read-playback-state', 'user-read-currently-playing', ...options.extraScopes],
 		crypto.randomBytes(16).toString('hex')
 	);
 	open(authUrl);
@@ -103,6 +77,40 @@ const authorizeSpotify = () => {
 		getUserCredentials();
 	}
 };
+
+const spotify = () => new Promise(res => {
+	spotifyApi
+		.getMyCurrentPlaybackState()
+		.then((data) => {
+			// Check if spotify is running on an authorized device
+			if (!data.body.device) res({ success: false, error: new Error('No Device') });
+			if (
+				!options.allowedDevices.includes(data.body.device.id)
+				&& !options.allowedDevices.includes(data.body.device.name)
+			) res({ success: false, error: new Error('Unauthorized Device') });
+
+			// eslint-disable-next-line max-len
+			if (data.body.currently_playing_type === 'ad') res({ success: false, error: new Error('Ad is currently playing') });
+			else res({
+				success: true,
+				result: `${data.body.item.artists[0].name} - ${data.body.item.name}`,
+				smallData: `Volume: ${data.body.device.volume_percent}`,
+				button: {
+					label: 'Listen',
+					url: data.body.item.external_urls.spotify
+				},
+				startTimestamp: Date.now() + data.body.progress_ms,
+				endTimestamp: Date.now() + data.body.item.duration_ms
+			});
+		})
+		.catch(err => {
+			if (err.toString().toLowerCase().includes('access token expired')) {
+				logSpotifyWarning('Access token expired! Regenerating access token.');
+				authorizeSpotify();
+			}
+			res({ success: false, error: err });
+		});
+});
 
 module.exports = spotify;
 module.exports.init = authorizeSpotify;
