@@ -10,6 +10,9 @@
 // @grant        unsafeWindow
 // ==/UserScript==
 
+// DO NOT TOUCH
+const version = '1.0.1';
+
 const animepahe = () => {
 	setTimeout(() => {
 		const teInfo = document
@@ -24,7 +27,7 @@ const animepahe = () => {
 		// URIEncodes every value in the object
 		// eslint-disable-next-line
 		Object.keys(anime).forEach(
-			(key) => (anime[key] = encodeURIComponent(anime[key]))
+			key => (anime[key] = encodeURIComponent(anime[key]))
 		);
 
 		setInterval(
@@ -38,22 +41,28 @@ const animepahe = () => {
 };
 
 const kwik = () => {
-	const timeData = { currentTime: 0, duration: 0 };
+	const timeData = { currentTime: 0, duration: 0, paused: true };
 
 	const player = document.getElementById('kwikPlayer');
 
 	player.addEventListener('timeupdate', () => {
 		timeData.currentTime = player.currentTime;
 		timeData.duration = player.duration;
+		timeData.paused = player.paused;
 	});
 
 	setInterval(
 		() => fetch(
-			`http://localhost:49948/time?currentTime=${timeData.currentTime}&duration=${timeData.duration}`,
+			// eslint-disable-next-line max-len
+			`http://localhost:49948/time?currentTime=${timeData.currentTime}&duration=${timeData.duration}&paused=${timeData.paused}`,
 			{ mode: 'no-cors' }
 		),
-		5 * 1000
+		7.5 * 1000
 	);
 };
 
 document.domain === 'animepahe.com' ? animepahe() : kwik();
+
+fetch(`http://localhost:49948/scriptversion?version=${version}`, {
+	mode: 'no-cors'
+});

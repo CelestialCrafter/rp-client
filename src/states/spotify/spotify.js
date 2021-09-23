@@ -35,7 +35,7 @@ const getUserCredentials = () => {
 		if (!req.query.code) return logSpotifyError('No Auth Code');
 		spotifyApi
 			.authorizationCodeGrant(req.query.code)
-			.then((data) => {
+			.then(data => {
 				spotifyApi.setAccessToken(data.body.access_token);
 				spotifyApi.setRefreshToken(data.body.refresh_token);
 				try {
@@ -50,7 +50,11 @@ const getUserCredentials = () => {
 	});
 
 	const authUrl = spotifyApi.createAuthorizeURL(
-		['user-read-playback-state', 'user-read-currently-playing', ...options.extraScopes],
+		[
+			'user-read-playback-state',
+			'user-read-currently-playing',
+			...options.extraScopes
+		],
 		crypto.randomBytes(16).toString('hex')
 	);
 	open(authUrl);
@@ -61,11 +65,11 @@ const authorizeSpotify = () => {
 		spotifyApi.setRefreshToken(readFileSync(credentialPath));
 		spotifyApi
 			.refreshAccessToken()
-			.then((data) => {
+			.then(data => {
 				spotifyApi.setAccessToken(data.body.access_token);
 				logSpotify('Spotify has been authorized');
 			})
-			.catch((err) => {
+			.catch(err => {
 				logSpotifyError(err);
 				logSpotifyError('Requesting user authentication');
 				getUserCredentials();
@@ -81,12 +85,12 @@ const authorizeSpotify = () => {
 const spotify = () => new Promise(res => {
 	spotifyApi
 		.getMyCurrentPlaybackState()
-		.then((data) => {
+		.then(data => {
 			// Check if spotify is running on an authorized device
 			if (!data.body.device) res({ success: false, error: new Error('No Device') });
 			if (
 				!options.allowedDevices.includes(data.body.device.id)
-				&& !options.allowedDevices.includes(data.body.device.name)
+					&& !options.allowedDevices.includes(data.body.device.name)
 			) res({ success: false, error: new Error('Unauthorized Device') });
 
 			// eslint-disable-next-line max-len

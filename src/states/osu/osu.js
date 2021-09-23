@@ -16,13 +16,13 @@ const osu = () => new Promise(res => {
 				`https://osu.ppy.sh/api/v2/users/${options.userId}/scores/recent?include_fails=1&limit=1`,
 				{ headers: { Authorization: `Bearer ${accessToken}` } }
 			)
-			.then((response) => res({
+			.then(response => res({
 					success: true,
 					// eslint-disable-next-line max-len
 					result: `${response.data[0].beatmapset.artist_unicode} - ${response.data[0].beatmapset.title_unicode}`,
 					button: { label: 'Spectate', url: `osu://spectate/${options.userId}` }
 				}))
-			.catch((error) => res({ success: false, error }));
+			.catch(error => res({ success: false, error }));
 	});
 
 const authorizeOsu = () => {
