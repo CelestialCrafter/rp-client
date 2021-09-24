@@ -26,8 +26,8 @@ const animepahe = () => new Promise(res => {
 
 		currentTime.paused
 			? res(requiredResponse) : res({
-				startTimestamp: currentTime.paused ? null : time,
-				endTimestamp: currentTime.paused ? null : time + (currentTime.duration - currentTime.currentTime),
+				startTimestamp: time,
+				endTimestamp: time + (currentTime.duration - currentTime.currentTime),
 				...requiredResponse
 			});
 	}
@@ -50,7 +50,7 @@ const startAnimeServer = () => {
 			if (Date.now() - animeLastRequestTimestamp > 30 * 1000) {
 				currentAnime = null;
 				logAnime(
-					'Browser has not sent anime data within 30 seconds. Clearing anime data'
+					'Browser has not sent anime daa within 30 seconds. Clearing anime data'
 				);
 			}
 		}, 30 * 1000);
@@ -62,7 +62,8 @@ const startAnimeServer = () => {
 		currentTime = {
 			currentTime: req.query.currentTime * 1000,
 			duration: req.query.duration * 1000,
-			paused: req.query.paused ?? false
+			// Converts req.query.paused to boolean
+			paused: req.query.paused === 'true'
 		};
 		timeLastRequestTimestamp = Date.now();
 

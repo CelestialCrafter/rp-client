@@ -22,7 +22,7 @@ logMain(`Running from ${require('path').resolve('.')}`);
 let getAfk = () => 0;
 
 try {
-	// eslint-disable-next-line global-require, import/no-extraneous-dependencies
+	// eslint-disable-next-line global-require
 	const system = require('@paulcbetts/system-idle-time');
 	getAfk = () => system.getIdleTime() >= options.afkTime;
 	logAFK('AFK Enabled');
