@@ -12,29 +12,28 @@ let currentTime = null;
 let animeLastRequestTimestamp = 0;
 let timeLastRequestTimestamp = 0;
 
-const animepahe = () =>
-	new Promise(res => {
-		const time = Date.now();
+const animepahe = () => new Promise(res => {
+	const time = Date.now();
 
-		if (!currentAnime) res({ success: false, error: new Error('No Anime') });
-		if (!currentTime) res({ success: false, error: new Error('No Time') });
-		else {
-			const requiredResponse = {
-				success: true,
-				result: `${currentAnime.title} - Episode ${currentAnime.episode}`,
-				usingText: 'Watching Anime'
-			};
+	if (!currentAnime) res({ success: false, error: new Error('No Anime') });
+	if (!currentTime) res({ success: false, error: new Error('No Time') });
+	else {
+		const requiredResponse = {
+			success: true,
+			result: `${currentAnime.title} - Episode ${currentAnime.episode}`,
+			usingText: 'Watching Anime'
+		};
 
-			currentTime.paused
-				? res(requiredResponse)
-				: res({
-						startTimestamp: time,
-						endTimestamp:
+		currentTime.paused
+			? res(requiredResponse)
+			: res({
+				startTimestamp: time,
+				endTimestamp:
 							time + (currentTime.duration - currentTime.currentTime),
-						...requiredResponse
-				  });
-		}
-	});
+				...requiredResponse
+			});
+	}
+});
 
 const startAnimeServer = () => {
 	const script = readFileSync(join(__dirname, 'rp-client-animepahe.user.js'), {
@@ -97,8 +96,7 @@ const startAnimeServer = () => {
 
 	app.get('/scriptversion', (req, res) => {
 		res.status(200).json({});
-		if (req.query.version !== scriptVersion)
-			logAnime(`Userscript is not on the latest version!
+		if (req.query.version !== scriptVersion) logAnime(`Userscript is not on the latest version!
 		Latest: ${scriptVersion} | Using: ${req.query.version}`);
 	});
 

@@ -31,11 +31,10 @@ const animepahe = () => {
 		);
 
 		setInterval(
-			() =>
-				fetch(
-					`http://localhost:49948/anime?title=${anime.title}&episode=${anime.episode}`,
-					{ mode: 'no-cors' }
-				),
+			() => fetch(
+				`http://localhost:49948/anime?title=${anime.title}&episode=${anime.episode}`,
+				{ mode: 'no-cors' }
+			),
 			15 * 1000
 		);
 	}, 3 * 1000);
@@ -53,12 +52,11 @@ const kwik = () => {
 	});
 
 	setInterval(
-		() =>
-			fetch(
-				// eslint-disable-next-line max-len
-				`http://localhost:49948/time?currentTime=${timeData.currentTime}&duration=${timeData.duration}&paused=${timeData.paused}`,
-				{ mode: 'no-cors' }
-			),
+		() => fetch(
+			// eslint-disable-next-line max-len
+			`http://localhost:49948/time?currentTime=${timeData.currentTime}&duration=${timeData.duration}&paused=${timeData.paused}`,
+			{ mode: 'no-cors' }
+		),
 		7.5 * 1000
 	);
 };
