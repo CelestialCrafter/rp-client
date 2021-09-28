@@ -63,8 +63,8 @@ const refreshStatus = ({ client, getAfk }) => async () => {
 
 	const buttons = [options.button];
 	// If state exists, check if a button exists on the state and push it to the buttons list
-	// eslint-disable-next-line no-unused-expressions, no-nested-ternary
-	state.success ? (state.button ? buttons.push(state.button) : null) : null;
+	if (state.success && state.button) buttons.push(state.button);
+	if (buttons.length === 1 && options.extraButton) buttons.push(options.extraButton);
 
 	const statusIndex = Math.floor(Math.random() * options.statuses.length);
 	const requiredLogs = {

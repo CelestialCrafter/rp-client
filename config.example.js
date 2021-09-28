@@ -10,6 +10,10 @@ const config = {
 		label: 'cool link',
 		url: 'http://google.com'
 	},
+	extraButton: {
+		label: 'not cool link',
+		url: 'http://virus.com'
+	},
 	processes: [
 		{
 			display: 'App Name!',
