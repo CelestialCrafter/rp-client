@@ -23,7 +23,7 @@ const refreshStatus
 		const stateArray = [];
 
 		formattedProcessesUB.forEach(fp => {
-			if (options.bumpStateProcessesBy && fp.state) stateArray.push({ fp, state: fp.state() });
+			if (options.boostStates && fp.state) stateArray.push({ fp, state: fp.state() });
 		});
 
 		await Promise.all(stateArray.map(s => s.state)).then(states => states.forEach((state, index) => {
@@ -31,7 +31,8 @@ const refreshStatus
 			if (state.success) {
 				bumpedProcesses.push(fp);
 				logMain(
-					`State running for process ${fp.name} Bumping priority by ${options.bumpStateProcessesBy}`
+					// eslint-disable-next-line max-len
+					`State running for process ${fp.name} Bumping priority by ${options.boostStates + fp.boostState ?? 0}`
 				);
 			}
 		}));
@@ -42,7 +43,7 @@ const refreshStatus
 		);
 		bumpedProcesses.forEach(bp => formattedProcesses.push({
 			...bp,
-			priority: bp.priority + options.bumpStateProcessesBy
+			priority: bp.priority + options.boostStates + (bp.boostState ?? 0)
 		}));
 		/* eslint-enable max-len */
 
@@ -97,8 +98,7 @@ const refreshStatus
 						large_text: `${client.user.username}#${client.user.discriminator}`,
 						small_image: process?.image,
 						// eslint-disable-next-line max-len
-						small_text: `${process.name} - Priority: ${process.priority}${
-							state.smallData ? ` - ${state.smallData}` : ''
+						small_text: `${process.name} - Priority: ${process.priority}${state.smallData ? ` - ${state.smallData}` : ''
 						}`
 					},
 					timestamps: {
