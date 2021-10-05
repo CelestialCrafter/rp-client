@@ -89,8 +89,10 @@ const spotify = () => new Promise(res => {
 			// Check if spotify is running on an authorized device
 			if (!data.body.device) res({ success: false, error: new Error('No Device') });
 			if (
-				!options.allowedDevices.includes(data.body.device.id)
-					&& !options.allowedDevices.includes(data.body.device.name)
+				!(
+					options.allowedDevices.includes(data.body.device.id)
+						|| options.allowedDevices.includes(data.body.device.name)
+				)
 			) res({ success: false, error: new Error('Unauthorized Device') });
 
 			// eslint-disable-next-line max-len
@@ -103,8 +105,11 @@ const spotify = () => new Promise(res => {
 					label: 'Listen',
 					url: data.body.item.external_urls.spotify
 				},
-				startTimestamp: Date.now() + data.body.progress_ms,
-				endTimestamp: Date.now() + data.body.item.duration_ms
+				startTimestamp: Date.now() - data.body.progress_ms,
+				// eslint-disable-next-line max-len
+				endTimestamp: options.timeLeft
+					? Date.now() - data.body.progress_ms + data.body.item.duration_ms
+					: undefined
 			});
 		})
 		.catch(err => {
