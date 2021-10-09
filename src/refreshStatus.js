@@ -33,7 +33,7 @@ const refreshStatus
 				logMain(
 					// eslint-disable-next-line max-len
 					`State running for process ${fp.name} Bumping priority by ${
-						options.boostStates + fp.boostState ?? 0
+						options.boostStates + (fp.boostState ?? 0)
 					}`
 				);
 			}
