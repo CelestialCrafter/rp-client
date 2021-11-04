@@ -95,6 +95,7 @@ const spotify = () => new Promise(res => {
 				)
 			) res({ success: false, error: new Error('Unauthorized Device') });
 
+			console.log(data.body.item);
 			// eslint-disable-next-line max-len
 			if (data.body.currently_playing_type === 'ad') res({ success: false, error: new Error('Ad is currently playing') });
 			else res({
@@ -103,7 +104,7 @@ const spotify = () => new Promise(res => {
 				smallData: `Volume: ${data.body.device.volume_percent}`,
 				button: {
 					label: 'Listen',
-					url: data.body.item.external_urls.spotify
+					url: data.body.item.uri
 				},
 				startTimestamp: Date.now() - data.body.progress_ms,
 				// eslint-disable-next-line max-len
