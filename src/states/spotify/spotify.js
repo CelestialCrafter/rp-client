@@ -106,7 +106,7 @@ const spotify = () => new Promise(res => {
 			if (data.body.currently_playing_type === 'ad') res({ success: false, error: new Error('Ad is currently playing') });
 			else res({
 				success: true,
-				result: `${data.body.item.artists[0].name} - ${data.body.item.name}`,
+				result: `${data.body.item.name} - ${data.body.item.artists[0].name}`,
 				smallData: `Volume: ${data.body.device.volume_percent}`,
 				button: {
 					label: 'Listen',
