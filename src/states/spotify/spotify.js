@@ -1,7 +1,7 @@
 const SpotifyWebApi = require('spotify-web-api-node');
 const app = require('express')();
 const open = require('open');
-const crypto = require('crypto');
+const { randomBytes, timingSafeEqual } = require('crypto');
 const {
 	writeFileSync, readFileSync, existsSync, mkdirSync
 } = require('fs');
@@ -29,10 +29,17 @@ const credentialPath = join(dataPath, 'spotifyCredentials.txt');
 
 const getUserCredentials = () => {
 	const listener = app.listen(52752, () => logHttp('Listening for spotify auth on port 52752'));
+	const state = randomBytes(16).toString('hex');
 
 	app.get('/', (req, res) => {
 		res.sendFile(join(__dirname, '../auth.html'));
 		if (!req.query.code) return logSpotifyError('No Auth Code');
+		if (!req.query.state) return logSpotifyError('No State');
+
+		const reqStateBuffer = Buffer.from(req.query.state, 'utf-8');
+		const validStateBuffer = Buffer.from(state, 'utf-8');
+
+		if (!timingSafeEqual(reqStateBuffer, validStateBuffer)) return logSpotifyError('States do not match');
 		spotifyApi
 			.authorizationCodeGrant(req.query.code)
 			.then(data => {
@@ -55,7 +62,7 @@ const getUserCredentials = () => {
 			'user-read-currently-playing',
 			...options.extraScopes
 		],
-		crypto.randomBytes(16).toString('hex')
+		state
 	);
 	open(authUrl);
 };
@@ -91,7 +98,7 @@ const spotify = () => new Promise(res => {
 			if (
 				!(
 					options.allowedDevices.includes(data.body.device.id)
-						|| options.allowedDevices.includes(data.body.device.name)
+					|| options.allowedDevices.includes(data.body.device.name)
 				)
 			) res({ success: false, error: new Error('Unauthorized Device') });
 
