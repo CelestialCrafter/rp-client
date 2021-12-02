@@ -63,7 +63,7 @@ const refreshStatus
 		else if (process.useState ?? false) state = { success: false, error: new Error('State not in use') };
 		else state = stateCache[process.name] ?? (await process.state());
 
-		if (!stateCache[process.name]) stateCache[process.name] = state;
+		if (process && !stateCache[process.name]) stateCache[process.name] = state;
 
 		const buttons = [options.button];
 		// If state exists, check if a button exists on the state and push it to the buttons list
