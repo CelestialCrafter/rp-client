@@ -7,7 +7,7 @@ const {
 } = require('fs');
 const { join } = require('path');
 const debug = require('debug');
-const options = require('./config.js');
+const options = require('./config');
 
 const logHttp = debug('http');
 const logSpotify = debug('feature:spotify');

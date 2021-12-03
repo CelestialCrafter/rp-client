@@ -2,7 +2,7 @@
 const axios = require('axios');
 const OAuth = require('oauth');
 const debug = require('debug');
-const options = require('./config.js');
+const options = require('./config');
 
 const logOsu = debug('feature:osu');
 

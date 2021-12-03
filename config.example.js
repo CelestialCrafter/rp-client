@@ -5,6 +5,7 @@ const config = {
 	afkTime: 5 * 60 * 1000,
 	refreshDelay: 10 * 1000,
 	bumpStateProcessesBy: 10,
+	loginRetryDelay: 2000,
 	statuses: ['status1', 'status2'],
 	button: {
 		label: 'cool link',

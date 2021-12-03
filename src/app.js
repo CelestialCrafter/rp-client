@@ -46,9 +46,13 @@ client.on('ready', () => {
 	logMain(`User ID: ${client.user.id}`);
 });
 
-client.login({ clientId: options.clientId }).catch(error => {
+const login = (tries = 0) => client.login({ clientId: options.clientId }).catch(error => {
 	logMainError(error);
-	process.exit(0);
+	if (tries >= 10) return process.exit(0);
+	setTimeout(login(tries + 1), options.loginRetryDelay || 2000);
+	login(tries + 1);
 });
+
+login();
 
 module.exports = { client, getAfk };
