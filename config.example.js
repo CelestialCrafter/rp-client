@@ -2,7 +2,7 @@
 const config = {
 	clientId: '823637382967328779',
 	image: 'cool_image_key',
-	afkTime: 5 * 60 * 1000,
+	afkTime: 5 * 60 * 1000, // Waits 5 minutes before changing your status to idle
 	refreshDelay: 10 * 1000,
 	bumpStateProcessesBy: 10,
 	loginRetryDelay: 2000,

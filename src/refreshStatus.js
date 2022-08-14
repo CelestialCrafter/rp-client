@@ -32,8 +32,7 @@ const refreshStatus
 				bumpedProcesses.push(fp);
 				logMain(
 					// eslint-disable-next-line max-len
-					`State running for process ${fp.name} Bumping priority by ${
-						options.boostStates + (fp.boostState ?? 0)
+					`State running for process ${fp.name} Bumping priority by ${options.boostStates + (fp.boostState ?? 0)
 					}`
 				);
 			}
@@ -45,7 +44,7 @@ const refreshStatus
 		);
 		bumpedProcesses.forEach(bp => formattedProcesses.push({
 			...bp,
-			priority: bp.priority + options.boostStates + (bp.boostState ?? 0)
+			priority: bp.priority + options.bumpStateProcessesBy + (bp.bumpStateProcessesBy ?? 0)
 		}));
 		/* eslint-enable max-len */
 
@@ -100,9 +99,8 @@ const refreshStatus
 						large_text: `${client.user.username}#${client.user.discriminator}`,
 						small_image: process?.image,
 						// eslint-disable-next-line max-len
-						small_text: `${process.name} - Priority: ${process.priority}${
-							state.smallData ? ` - ${state.smallData}` : ''
-						}`
+						small_text: `${process.name} - Priority: ${process.priority}${state.smallData ? ` - ${state.smallData}` : ''
+							}`
 					},
 					timestamps: {
 						start: state?.startTimestamp,
