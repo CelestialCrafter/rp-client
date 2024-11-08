@@ -1,5 +1,7 @@
 # rp-client
 
+**this project is complete.**
+
 Uses [Discord RPC](https://discord.com/developers/docs/topics/rpc/) to display what your doing and a status to go along with it
 
 ## Instructions
