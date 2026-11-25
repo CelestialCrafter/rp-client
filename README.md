@@ -2,6 +2,9 @@
 
 **this project is complete.**
 
+> [!WARNING]
+> this repository has moved to [tangled](https://tangled.org/celestial.moe/rp-client)!
+
 Uses [Discord RPC](https://discord.com/developers/docs/topics/rpc/) to display what your doing and a status to go along with it
 
 ## Instructions
